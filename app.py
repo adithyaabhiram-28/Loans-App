@@ -21,9 +21,8 @@ st.write(
 # Load & Prepare Data
 # -------------------------------
 @st.cache_data
-@st.cache_data
-def load_and_train(uploaded_file):
-    df = pd.read_csv(uploaded_file)
+def load_and_train():
+    df = pd.read_csv("loans.csv")
 
     # Handle missing values
     for col in df.columns:
@@ -32,7 +31,7 @@ def load_and_train(uploaded_file):
         else:
             df[col] = df[col].fillna(df[col].median())
 
-    from sklearn.preprocessing import LabelEncoder
+    # Encode categorical columns
     le_self = LabelEncoder()
     df['Self_Employed'] = le_self.fit_transform(df['Self_Employed'])
 
@@ -42,23 +41,16 @@ def load_and_train(uploaded_file):
     X = df[['ApplicantIncome', 'LoanAmount', 'Credit_History', 'Self_Employed']]
     y = df['Loan_Status']
 
-    from sklearn.model_selection import train_test_split
-    X_train, _, y_train, _ = train_test_split(
+    X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
     )
 
-    from sklearn.preprocessing import StandardScaler
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train)
 
     return X_train, y_train, scaler
-    
-uploaded_file = st.file_uploader("Upload loans.csv", type=["csv"])
 
-if uploaded_file:
-    X_train, y_train, scaler = load_and_train(uploaded_file)
-else:
-    st.stop()
+X_train, y_train, scaler = load_and_train()
 
 # -------------------------------
 # Sidebar Inputs
